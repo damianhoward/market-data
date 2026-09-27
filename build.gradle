@@ -1,31 +1,55 @@
 // Real instrument reference and quotes for the trading estate: fetches a symbol's mark from an
 // external provider and serves the last-good snapshot, so a consumer (the live order book) can
-// anchor its book to a real price instead of a synthetic seed. A library, depended on via
-// JitPack — no service, no box of its own.
+// anchor its book to a real price instead of a synthetic seed. A library, published to Maven
+// Central — no service, no box of its own.
 plugins {
-    id 'com.damianhoward.kotlin-conventions' version '0.5.4'
+    id 'com.damianhoward.kotlin-conventions' version '0.6.0'
     id 'application'
-    id 'maven-publish'
+    id 'com.vanniktech.maven.publish' version '0.37.0'
 }
 
 group = 'com.damianhoward'
-version = '2.0.1'
+version = '2.0.2'
 
 application {
     applicationName = 'market-data'
     mainClass = 'com.damianhoward.marketdata.MainKt'
 }
 
-// The build publishes itself rather than leaving JitPack to inject its own invocation. That
-// injection is what blocked adding the bounded distribution-download retry the other JitPack
-// builds carry: an explicit `install:` in jitpack.yml replaces the generated command, and
-// without a publication of our own there would be nothing left to publish. No remote
-// repository — JitPack builds from the git tag and serves the result under
-// com.github.damianhoward:market-data:<tag>; publishing exists for publishToMavenLocal.
-publishing {
-    publications {
-        maven(MavenPublication) {
-            from components.java
+// Published to Maven Central by the release workflow when a version is tagged, so a consumer
+// resolves com.damianhoward:market-data like any other library. Central requires sources, a
+// javadoc jar and a complete POM, and refuses the upload without them.
+mavenPublishing {
+    configure(new com.vanniktech.maven.publish.KotlinJvm(new com.vanniktech.maven.publish.JavadocJar.Empty(), true))
+    coordinates('com.damianhoward', 'market-data', version.toString())
+    publishToMavenCentral(true)
+    // Signed where the release workflow supplies a key; it arrives empty everywhere else.
+    if (!providers.gradleProperty('signingInMemoryKey').getOrElse('').isBlank()) {
+        signAllPublications()
+    }
+    pom {
+        name = 'market-data'
+        description = 'Real instrument reference and last-good quotes for the damianhoward trading estate.'
+        url = 'https://github.com/damianhoward/market-data'
+        inceptionYear = '2026'
+        licenses {
+            license {
+                name = 'The Apache License, Version 2.0'
+                url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
+                distribution = 'repo'
+            }
+        }
+        developers {
+            developer {
+                id = 'damianhoward'
+                name = 'Damian Howard'
+                url = 'https://github.com/damianhoward'
+            }
+        }
+        scm {
+            url = 'https://github.com/damianhoward/market-data'
+            connection = 'scm:git:https://github.com/damianhoward/market-data.git'
+            developerConnection = 'scm:git:ssh://git@github.com/damianhoward/market-data.git'
         }
     }
 }
