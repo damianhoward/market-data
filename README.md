@@ -7,7 +7,7 @@
 Real instrument reference and quotes for the trading estate: fetch a symbol's mark from a live
 provider and serve the last-good snapshot, so a consumer can anchor to a real price — the
 [live order book](https://github.com/damianhoward/orderbook) opens its book around the actual last
-trade in AAPL rather than a synthetic seed. A library, pulled in via JitPack; it runs in the
+trade in AAPL rather than a synthetic seed. A library on Maven Central; it runs in the
 consumer's process, not as a service of its own.
 
 ## Design
@@ -83,8 +83,8 @@ println("${quote.instrument.name}: ${quote.last} ${quote.instrument.currency}")
 ```
 
 ```groovy
-repositories { maven { url 'https://jitpack.io' } }
-dependencies { implementation 'com.github.damianhoward:market-data:v1.0.0' }
+repositories { mavenCentral() }
+dependencies { implementation 'com.damianhoward:market-data:2.0.2' }
 ```
 
 ## Build

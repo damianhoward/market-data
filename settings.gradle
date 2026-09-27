@@ -2,26 +2,18 @@ pluginManagement {
     repositories {
         gradlePluginPortal()
         mavenCentral()
-        maven { url = uri('https://jitpack.io') }
-    }
-    resolutionStrategy {
-        eachPlugin {
-            if (requested.id.namespace == 'com.damianhoward') {
-                useModule("com.github.damianhoward.build-conventions:plugins:${requested.version}")
-            }
-        }
     }
 }
 
 // The shared version catalog: versions two or more repos genuinely share (see the
-// version-catalog repo); application-specific dependencies stay in build.gradle.
+// build-conventions repo); application-specific dependencies stay in build.gradle.
 dependencyResolutionManagement {
     repositories {
-        maven { url = uri('https://jitpack.io') }
+        mavenCentral()
     }
     versionCatalogs {
         create('deps') {
-            from 'com.github.damianhoward.build-conventions:catalog:0.5.4'
+            from 'com.damianhoward:build-conventions-catalog:0.6.0'
         }
     }
 }
