@@ -9,7 +9,7 @@ plugins {
 }
 
 group = 'com.damianhoward'
-version = '2.0.2'
+version = '2.0.3'
 
 application {
     applicationName = 'market-data'
@@ -54,11 +54,26 @@ mavenPublishing {
     }
 }
 
+// The command line's SLF4J binding, kept out of the published POM. A library that ships a binding
+// chooses its consumers' logging for them: orderbook ran with Logback and this one both on its
+// classpath, and SLF4J picked whichever it found first. The binding reaches only the distribution's
+// lib/ and `run`, which are this repository's own command line.
+def cliRuntime = configurations.create('cliRuntime') {
+    canBeConsumed = false
+    // The API it binds is already on the library's own runtime classpath.
+    transitive = false
+    description = 'The logging binding of the command line, which the published library does not carry.'
+}
+
 dependencies {
     implementation deps.gson
     implementation deps.slf4j.api
-    runtimeOnly deps.slf4j.simple
+    add 'cliRuntime', deps.slf4j.simple
 }
+
+tasks.named('startScripts') { classpath = classpath + cliRuntime }
+tasks.named('run') { classpath = classpath + cliRuntime }
+distributions.main.contents { from(cliRuntime) { into 'lib' } }
 
 // Only the process entry point (MainKt — main() fetches a live quote and prints it) is excluded.
 // The provider client, JSON parsing, cache, and domain are all exercised by tests and counted.
